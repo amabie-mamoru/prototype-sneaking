@@ -4,11 +4,13 @@ namespace PrototypeSneaking.Domain
 {
     public interface ICharacter
     {
+        GameObject GameObject { get; }
     }
 
     public class Character : MonoBehaviour, ICharacter
     {
         [SerializeField] private Sight sight;
+        public GameObject GameObject => gameObject;
 
         public void Update()
         {

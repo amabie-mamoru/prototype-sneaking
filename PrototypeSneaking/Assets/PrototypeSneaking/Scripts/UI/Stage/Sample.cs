@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using PrototypeSneaking.Domain;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -8,9 +9,12 @@ namespace PrototypeSneaking.UI.Stage
     public class Sample : MonoBehaviour
     {
         [SerializeField] private GameObject button;
+        [SerializeField] private Character character;
+
         void Awake()
         {
             AddEventTrigger(button, OnClick);
+            Application.Stage.CharacterController.Instance.Attach(character);
         }
 
         public void AddEventTrigger(GameObject gameObj, Action action)
