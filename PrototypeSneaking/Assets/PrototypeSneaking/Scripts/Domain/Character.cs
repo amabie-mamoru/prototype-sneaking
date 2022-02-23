@@ -19,7 +19,7 @@ namespace PrototypeSneaking.Domain
         {
             sight.SetEyes(sensor.Eyes);
 #if UNITY_EDITOR
-            // TODO: ???????????????????????
+            // TODO: デバッグ用の例外処理
             sight.SetCharacter(this);
 #endif
         }
