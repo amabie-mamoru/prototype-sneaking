@@ -22,10 +22,9 @@ namespace PrototypeSneaking.Application.Stage
         public void Update()
         {
             var horizontal = Input.GetAxis("Horizontal");
-            //var vertical = Input.GetAxis("Vertical");
+            var vertical = Input.GetAxis("Vertical");
             if (horizontal != 0)
             {
-                Debug.Log("input!");
                 character.GameObject.transform.Translate(horizontal, 0, 0);
             }
         }
