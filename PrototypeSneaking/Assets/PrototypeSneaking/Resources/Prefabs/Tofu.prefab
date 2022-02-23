@@ -1,5 +1,60 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6583812537011771566
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9195165405507369810}
+  - component: {fileID: 558774095807604468}
+  m_Layer: 0
+  m_Name: Sensor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9195165405507369810
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6583812537011771566}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7796560996749017272}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &558774095807604468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6583812537011771566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77ae54271899245449dd8ff73efd3869, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  eyes:
+  - {x: 0.2, y: 0.6, z: 0}
+  edges:
+  - {x: 0.2, y: 0.8, z: 0.2}
+  - {x: 0.2, y: 0.8, z: -0.2}
+  - {x: -0.2, y: 0.8, z: 0.2}
+  - {x: -0.2, y: 0.8, z: -0.2}
+  - {x: 0.2, y: 0, z: 0.2}
+  - {x: 0.2, y: 0, z: -0.2}
+  - {x: -0.2, y: 0, z: 0.2}
+  - {x: -0.2, y: 0, z: -0.2}
 --- !u!1 &7796560996136853967
 GameObject:
   m_ObjectHideFlags: 0
@@ -226,6 +281,7 @@ Transform:
   - {fileID: 7796560997776977247}
   - {fileID: 7796560996744376748}
   - {fileID: 7796560996136853960}
+  - {fileID: 9195165405507369810}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -242,6 +298,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sight: {fileID: 7796560996831946154}
+  sensor: {fileID: 558774095807604468}
 --- !u!1 &7796560997776977246
 GameObject:
   m_ObjectHideFlags: 0
@@ -269,14 +326,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7796560997776977246}
-  m_LocalRotation: {x: 0.1464466, y: 0.35355338, z: 0.35355338, w: 0.8535535}
-  m_LocalPosition: {x: 0.9, y: 0.5, z: 0}
+  m_LocalRotation: {x: 0.33944437, y: 0.42660013, z: -0.17670354, w: 0.8194912}
+  m_LocalPosition: {x: 1, y: 0.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7796560996749017272}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 45, z: 45}
+  m_LocalEulerAnglesHint: {x: 45, y: 55, z: 0}
 --- !u!33 &7796560997776977242
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -352,4 +409,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bb06d00d50b54e36bef72c7db33adac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CapturedObjects: []
+  ObjectsInSight: []

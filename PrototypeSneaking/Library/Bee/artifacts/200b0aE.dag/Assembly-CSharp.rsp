@@ -351,6 +351,7 @@
 "Assets/PrototypeSneaking/Scripts/Application/SingletonBundler.cs"
 "Assets/PrototypeSneaking/Scripts/Application/Stage/CharacterController.cs"
 "Assets/PrototypeSneaking/Scripts/Domain/Character.cs"
+"Assets/PrototypeSneaking/Scripts/Domain/Sensor.cs"
 "Assets/PrototypeSneaking/Scripts/Domain/Sight.cs"
 "Assets/PrototypeSneaking/Scripts/UI/Stage/Sample.cs"
 "Assets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01.cs"
