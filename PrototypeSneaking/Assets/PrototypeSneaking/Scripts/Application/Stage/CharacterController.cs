@@ -25,7 +25,7 @@ namespace PrototypeSneaking.Application.Stage
             var vertical = Input.GetAxis("Vertical");
             if (horizontal != 0)
             {
-                character.GameObject.transform.Translate(horizontal, 0, 0);
+                character.Translate(horizontal * 0.1f, 0, 0);
             }
         }
     }

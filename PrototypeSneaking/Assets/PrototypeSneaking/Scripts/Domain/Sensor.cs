@@ -11,8 +11,21 @@ namespace PrototypeSneaking.Domain
         [SerializeField] List<Vector3> eyes;
         [SerializeField] List<Vector3> edges;
 
+        private Edges _edges;
         public List<Vector3> Eyes => eyes;
-        public List<Vector3> Edges => edges;
+        public Edges Edges {
+            get {
+                if (_edges == null) {
+                    var __edges = new Edge[edges.Count];
+                    for (int i = 0; i < edges.Count; i++)
+                    {
+                        __edges[i] = new Edge(edges[i]);
+                    }
+                    _edges = new Edges(__edges);
+                }
+                return _edges;
+            }
+        }
     }
 
 #if UNITY_EDITOR
