@@ -8,20 +8,32 @@ namespace PrototypeSneaking.Domain
 {
     public class Sensor : MonoBehaviour
     {
-        [SerializeField] List<Vector3> eyes;
-        [SerializeField] List<Vector3> edges;
+        // NOTE: 開発効率と処理速度を天秤にかけてあえて Vector3 で保持するのはやめた
+        // 処理速度優先なら GameObject を配置しない方が効率はいいはずだが
+        // 本体の Translate / Rotate が発生した場合に Vector3 だとそちらにも処理をしないといけない上
+        // UnityEngine インターフェースで予想外の処理を書いてしまった時のバグ検知リスクの方が高いと考えて
+        // あえて GameObject で表現するようにした
+        // 管理できる仕組み作りにできる自身があるなら Vector3 の方がよい
+        [SerializeField] List<GameObject> eyes;
+        [SerializeField] List<GameObject> edges;
 
-        private Edges _edges;
-        public List<Vector3> Eyes => eyes;
-        public Edges Edges {
+        public List<Vector3> Eyes {
             get {
-                if (_edges == null) {
-                    var __edges = new Edge[edges.Count];
-                    for (int i = 0; i < edges.Count; i++)
-                    {
-                        __edges[i] = new Edge(edges[i]);
-                    }
-                    _edges = new Edges(__edges);
+                // NOTE: キャッシュしちゃうと移動したときに座標が古いものを参照するのでキャッシュできない
+                List<Vector3>  _eyes = new List<Vector3>();
+                foreach (var eye in eyes)
+                {
+                    _eyes.Add(eye.transform.position);
+                }
+                return _eyes;
+            }
+        }
+        public List<Vector3> Edges {
+            get {
+                List<Vector3>  _edges = new List<Vector3>();
+                foreach (var edge in edges)
+                {
+                    _edges.Add(edge.transform.position);
                 }
                 return _edges;
             }
@@ -38,17 +50,21 @@ namespace PrototypeSneaking.Domain
             var edges = serializedObject.FindProperty("edges");
             for (var i = 0; i < eyes.arraySize; i++)
             {
-                MakePoint(eyes.GetArrayElementAtIndex(i).vector3Value, "Eye");
+                if (eyes.GetArrayElementAtIndex(i).objectReferenceValue == null) { continue; }
+                MakePoint((GameObject)eyes.GetArrayElementAtIndex(i).objectReferenceValue, "Eye");
             }
             for (var i = 0; i < edges.arraySize; i++)
             {
-                MakePoint(edges.GetArrayElementAtIndex(i).vector3Value, "Edge");
+                if (edges.GetArrayElementAtIndex(i).objectReferenceValue == null) { continue; }
+                MakePoint(edges.GetArrayElementAtIndex(i).objectReferenceValue as GameObject, "Edge");
             }
         }
 
-        private void MakePoint(Vector3 pos, string prefabName)
+        private void MakePoint(GameObject gameObj, string prefabName)
         {
             var sensor = Transform.FindObjectOfType<Sensor>();
+            // Prefab を Scene Window で見た時は null。 Scene 上に配置したときは not null になる
+            if (sensor == null) { return; }
             // 本来は以下の方がいいらしいがなぜか null になるので。
             //var prefab = EditorGUIUtility.Load("Prefabs/EditorPoint") as GameObject;
             var prefab = Resources.Load<GameObject>($"Prefabs/{prefabName}");
@@ -56,7 +72,7 @@ namespace PrototypeSneaking.Domain
             point.tag = "DebugEditor";
             point.name = point.name.Replace("(Clone)", "");
             point.transform.SetParent(sensor.transform);
-            point.transform.position = pos;
+            point.transform.position = gameObj.transform.position;
         }
 
         public void OnDisable()

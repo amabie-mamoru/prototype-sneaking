@@ -13,21 +13,7 @@ namespace PrototypeSneaking.Domain
         /// <summary>
         /// 視界に捉えている物質
         /// </summary>
-        private List<GameObject> foundObjects;
-        public List<IBody> FoundObjects {
-            get {
-                List<IBody> bodies = new List<IBody>();
-                foreach (var obj in foundObjects)
-                {
-                    var body = obj.GetComponent<IBody>();
-                    if (body == null) {
-                        throw new SightException($"{obj.name} attempts no Body script.");
-                    }
-                    bodies.Add(body);
-                }
-                return bodies;
-            }
-        }
+        public List<GameObject> FoundObjects;
 
         /// <summary>
         /// 気配を捉えているかどうか
@@ -37,17 +23,19 @@ namespace PrototypeSneaking.Domain
         /// <summary>
         /// 視界に捉えているかどうか
         /// </summary>
-        public bool IsFound => foundObjects.Count > 0;
+        public bool IsFound => FoundObjects.Count > 0;
 
         private uint foundCounter = 0;
         private uint lostCounter = 0;
 
         private List<Vector3> eyePositions;
 
+        public GameObject GameObject => gameObject;
+
         public Sight()
         {
             ObjectsInSight = new List<GameObject>();
-            foundObjects = new List<GameObject>();
+            FoundObjects = new List<GameObject>();
         }
 
         public void SetEyes(List<Vector3> eyePositions)
@@ -97,13 +85,13 @@ namespace PrototypeSneaking.Domain
             if (IsFound && !FeelSigns)
             {
                 var msg = $"GameObject ({character.Name}) has unexcepted collision. "
-                        + $"{foundObjects.Count} gameObjects unexcepted. "
-                        + $"(e.g. {FoundObjects[0].Name} is found, but no feel sign)";
+                        + $"{FoundObjects.Count} gameObjects unexcepted. "
+                        + $"(e.g. {FoundObjects[0].name} is found, but no feel sign)";
                 throw new SightException(msg);
             }
-            if (ObjectsInSight.Count != foundObjects.Count)
+            if (ObjectsInSight.Count < FoundObjects.Count)
             {
-                throw new SightException("今のところ数ずれるのはナシ！");
+                throw new SightException("FoundObjects are more than ObjectsInSight");
             }
         }
 #endif
@@ -128,14 +116,12 @@ namespace PrototypeSneaking.Domain
         private void FindOrLoseWithRay(Vector3 eyePosition, GameObject gameObj)
         {
             var edges = gameObj.GetComponent<Character>()?.Edges;
-
             // edges を設定していないオブジェクトの判定
             if (edges == null)
             {
                 FindOrLoseWithRay(eyePosition, gameObj.transform.position, gameObj);
                 return;
             }
-
             foreach (var edgePosition in edges)
             {
                 FindOrLoseWithRay(eyePosition, edgePosition, gameObj);
@@ -146,24 +132,24 @@ namespace PrototypeSneaking.Domain
         {
             var direction = Vector3.Normalize(gameObjTargetPosition - eyePosition);
             var maxDistance = Vector3.Magnitude(gameObjTargetPosition - eyePosition) + 1f; // ちょっと長めに設定しておく
-            int layerMask = ~(1 << 2 | 1 << 11);
-            if (!Physics.Raycast(eyePosition, direction, out RaycastHit hitinfo, maxDistance, ~layerMask)) {
-                // NOTE: ここには絶対こない想定
-                // TriggerStay している時点で目的の GameObject or それ以外の障害物にぶつかるはずなので。
-                throw new SightException($"Except {gameObj.name}, but cannot find. The position is ({gameObjTargetPosition}).");
+            int layerMask = ~(1 << 2);
+            if (!Physics.Raycast(eyePosition, direction, out RaycastHit hitinfo, maxDistance, layerMask))
+            {
+                // 間にオブジェクトの一部自体は入っているが、edge が設置されているとき含まれないケースのときにここにくる
+                return;
             }
             var firstHitGameObject = hitinfo.collider.gameObject;
             if (WantToFind(firstHitGameObject))
             {
-                if (foundObjects.Exists(obj => obj.GetInstanceID() == gameObj.GetInstanceID())) { return; }
+                if (FoundObjects.Exists(obj => obj.GetInstanceID() == gameObj.GetInstanceID())) { return; }
                 foundCounter++;
-                foundObjects.Add(firstHitGameObject);
+                FoundObjects.Add(firstHitGameObject);
             }
             else {
-                var index = foundObjects.FindIndex(obj => obj.GetInstanceID() == gameObj.GetInstanceID());
+                var index = FoundObjects.FindIndex(obj => obj.GetInstanceID() == gameObj.GetInstanceID());
                 if (index == -1) { return; }
                 lostCounter++;
-                foundObjects.RemoveAt(index);
+                FoundObjects.RemoveAt(index);
             }
         }
 
@@ -186,15 +172,15 @@ namespace PrototypeSneaking.Domain
             ObjectsInSight.RemoveAt(index);
 
             // 障害物なしに視界の外に出てしまった場合
-            index = foundObjects.FindIndex(obj => obj.GetInstanceID() == gameObj.GetInstanceID());
+            index = FoundObjects.FindIndex(obj => obj.GetInstanceID() == gameObj.GetInstanceID());
             if (index == -1) { return; }
             lostCounter++;
-            foundObjects.RemoveAt(index);
+            FoundObjects.RemoveAt(index);
         }
 
         private bool WantToFind(GameObject gameObj)
         {
-            return gameObj.GetComponent<IBody>() != null;
+            return gameObj.layer != 2; // TODO: 一旦常に true
         }
     }
 
