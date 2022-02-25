@@ -30,6 +30,14 @@ namespace PrototypeSneaking.Domain
 
         private List<Vector3> eyePositions;
 
+        public GameObject GameObject => gameObject;
+
+        public Sight()
+        {
+            ObjectsInSight = new List<GameObject>();
+            FoundObjects = new List<GameObject>();
+        }
+
         public void SetEyes(List<Vector3> eyePositions)
         {
             this.eyePositions = eyePositions;
@@ -76,14 +84,14 @@ namespace PrototypeSneaking.Domain
             // 何かを見つけてる状態なのに気配はない状態はありえない
             if (IsFound && !FeelSigns)
             {
-                var msg = $"GameObject ({character.GameObject.name}) has unexcepted collision. "
+                var msg = $"GameObject ({character.Name}) has unexcepted collision. "
                         + $"{FoundObjects.Count} gameObjects unexcepted. "
-                        + $"(e.g. {FoundObjects[0].gameObject.name} is found, but no feel sign)";
+                        + $"(e.g. {FoundObjects[0].name} is found, but no feel sign)";
                 throw new SightException(msg);
             }
-            if (ObjectsInSight.Count != FoundObjects.Count)
+            if (ObjectsInSight.Count < FoundObjects.Count)
             {
-                throw new SightException("今のところ数ずれるのはナシ！");
+                throw new SightException("FoundObjects are more than ObjectsInSight");
             }
         }
 #endif
@@ -108,14 +116,12 @@ namespace PrototypeSneaking.Domain
         private void FindOrLoseWithRay(Vector3 eyePosition, GameObject gameObj)
         {
             var edges = gameObj.GetComponent<Character>()?.Edges;
-
             // edges を設定していないオブジェクトの判定
             if (edges == null)
             {
                 FindOrLoseWithRay(eyePosition, gameObj.transform.position, gameObj);
                 return;
             }
-
             foreach (var edgePosition in edges)
             {
                 FindOrLoseWithRay(eyePosition, edgePosition, gameObj);
@@ -126,11 +132,11 @@ namespace PrototypeSneaking.Domain
         {
             var direction = Vector3.Normalize(gameObjTargetPosition - eyePosition);
             var maxDistance = Vector3.Magnitude(gameObjTargetPosition - eyePosition) + 1f; // ちょっと長めに設定しておく
-            int layerMask = 1 << 8;
-            if (!Physics.Raycast(eyePosition, direction, out RaycastHit hitinfo, maxDistance, ~layerMask)) {
-                // NOTE: ここには絶対こない想定
-                // TriggerStay している時点で目的の GameObject or それ以外の障害物にぶつかるはずなので。
-                throw new SightException($"Except {gameObj.name}, but cannot find. The position is ({gameObjTargetPosition}).");
+            int layerMask = ~(1 << 2);
+            if (!Physics.Raycast(eyePosition, direction, out RaycastHit hitinfo, maxDistance, layerMask))
+            {
+                // 間にオブジェクトの一部自体は入っているが、edge が設置されているとき含まれないケースのときにここにくる
+                return;
             }
             var firstHitGameObject = hitinfo.collider.gameObject;
             if (WantToFind(firstHitGameObject))
@@ -174,12 +180,7 @@ namespace PrototypeSneaking.Domain
 
         private bool WantToFind(GameObject gameObj)
         {
-            // TODO: 物体を投げて反応させるとかもやりたいので今後拡張の可能性あり Tag で判断してもよさそう
-            // Nose のように視界に入りうるゲームオブジェクトは [SerializedField] で設定させて除外するか Collider を切ること！
-            // Tofu では Nose の Collider を off にしている。見回すキャラの場合は除外オブジェクトの設定必須
-            // (というか、Raycast するときに layerMask で除外しないと firstHitGameObject が Nose になってしまうので追加処理必須)
-            // return gameObj.GetComponent<Character>() != null;
-            return true; // TODO: 現状はデバッグ用のオブジェクトを反応させたいので常に true
+            return gameObj.layer != 2; // TODO: 一旦常に true
         }
     }
 
