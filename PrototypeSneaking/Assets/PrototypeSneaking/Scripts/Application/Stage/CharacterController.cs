@@ -1,4 +1,4 @@
-using PrototypeSneaking.Domain;
+using PrototypeSneaking.Domain.Stage;
 using UnityEngine;
 using com.amabie.SingletonKit;
 
@@ -16,7 +16,7 @@ namespace PrototypeSneaking.Application.Stage
         public void Attach(ICharacter character)
         {
             this.character = character;
-            character.DisableSight();
+            character.ToControll();
         }
 
         // TODO: UpdateByFrame にするかは実装次第

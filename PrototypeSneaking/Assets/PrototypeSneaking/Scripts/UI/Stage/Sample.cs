@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using PrototypeSneaking.Domain;
+using PrototypeSneaking.Domain.Stage;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
