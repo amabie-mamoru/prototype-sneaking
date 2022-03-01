@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace PrototypeSneaking.Domain
+namespace PrototypeSneaking.Domain.Stage
 {
     public class Sight : MonoBehaviour
     {
@@ -32,15 +32,32 @@ namespace PrototypeSneaking.Domain
 
         public GameObject GameObject => gameObject;
 
+        private bool Enabled;
+
         public Sight()
         {
             ObjectsInSight = new List<GameObject>();
             FoundObjects = new List<GameObject>();
+            Enabled = true;
         }
 
         public void SetEyes(List<Vector3> eyePositions)
         {
             this.eyePositions = eyePositions;
+        }
+
+        public void ToDisable()
+        {
+            ObjectsInSight = new List<GameObject>();
+            FoundObjects = new List<GameObject>();
+            foundCounter = 0;
+            lostCounter = 0;
+            Enabled = false;
+        }
+
+        public void ToEnable()
+        {
+            Enabled = true;
         }
 
         /// <summary>
@@ -98,11 +115,13 @@ namespace PrototypeSneaking.Domain
 
         public void OnTriggerEnter(Collider other)
         {
+            if (!Enabled) { return; }
             Include(other.gameObject);
         }
 
         public void OnTriggerStay(Collider _other)
         {
+            if (!Enabled) { return; }
             if (ObjectsInSight.Count == 0) { return; }
             foreach (var eyePosition in eyePositions)
             {
@@ -155,6 +174,7 @@ namespace PrototypeSneaking.Domain
 
         public void OnTriggerExit(Collider other)
         {
+            if (!Enabled) { return; }
             Exclude(other.gameObject);
         }
 

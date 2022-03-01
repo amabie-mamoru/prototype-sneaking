@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace PrototypeSneaking.Domain
+namespace PrototypeSneaking.Domain.Stage
 {
     public class Sensor : MonoBehaviour
     {
