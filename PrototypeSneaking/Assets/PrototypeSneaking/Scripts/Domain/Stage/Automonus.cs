@@ -93,7 +93,7 @@ namespace PrototypeSneaking.Domain.Stage
         private void UpdateToLose()
         {
             if (walkStatus != WalkStatus.GoBack) { return; }
-            if (Vector3.Magnitude(transform.position - agent.destination) == 0)
+            if (Vector3.Magnitude(transform.position - agent.destination) <= 0.001f)
             {
                 ReachOrigin();
                 sight.ToEnable();
