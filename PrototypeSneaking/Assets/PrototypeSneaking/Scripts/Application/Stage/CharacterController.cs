@@ -16,7 +16,6 @@ namespace PrototypeSneaking.Application.Stage
         public void Attach(ICharacter character)
         {
             this.character = character;
-            character.ToControll();
         }
 
         // TODO: UpdateByFrame にするかは実装次第

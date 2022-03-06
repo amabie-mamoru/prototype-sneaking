@@ -43,18 +43,18 @@ class Sight {
 
 Automonus *-- Sight
 
-interface ICharacterBehaviour {
-  void CheckSight(NavMeshAgent agent);
+interface ICharacterHabit {
+  void Behave();
 }
 
-Automonus *-- ICharacterBehaviour
+Automonus *-- ICharacterHabit
 
-class GoStraightBehaviour {}
+class GoStraightHabit {}
 
-class TrackingBehaviour {}
+class TrackingHabit {}
 
-ICharacterBehaviour <|-- GoStraightBehaviour
-ICharacterBehaviour <|-- TrackingBehaviour
+ICharacterHabit <|-- GoStraightHabit
+ICharacterHabit <|-- TrackingHabit
 
 @enduml
 ```
