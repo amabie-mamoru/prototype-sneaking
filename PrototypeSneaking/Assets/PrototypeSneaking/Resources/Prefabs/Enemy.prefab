@@ -505,7 +505,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bb06d00d50b54e36bef72c7db33adac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FoundObjects: []
 --- !u!1 &8166449772373143181
 GameObject:
   m_ObjectHideFlags: 0
@@ -550,7 +549,7 @@ GameObject:
   - component: {fileID: 8166449771113519778}
   - component: {fileID: 4552504083833957353}
   - component: {fileID: 4552504083833957358}
-  - component: {fileID: 8160067779025169702}
+  - component: {fileID: 3678017843187505922}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -621,7 +620,7 @@ MonoBehaviour:
   sensor: {fileID: 8166449770936731055}
   sight: {fileID: 8166449772105417899}
   agent: {fileID: 4552504083833957358}
-  habit: {fileID: 8160067779025169702}
+  habit: {fileID: 3678017843187505922}
 --- !u!195 &4552504083833957358
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -644,7 +643,7 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &8160067779025169702
+--- !u!114 &3678017843187505922
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -653,7 +652,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 9048970927547066359}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d12c6b3446d446d1b94efb87781593f, type: 3}
+  m_Script: {fileID: 11500000, guid: 6d16b36a98fe942a79baacc168120f75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &9095509274267125691

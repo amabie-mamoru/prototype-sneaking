@@ -13,6 +13,7 @@ namespace PrototypeSneaking.Domain.Stage
         /// <summary>
         /// 視界に捉えている物質
         /// </summary>
+        [System.NonSerialized]
         public List<GameObject> FoundObjects;
 
         /// <summary>
@@ -157,18 +158,13 @@ namespace PrototypeSneaking.Domain.Stage
                 // 間にオブジェクトの一部自体は入っているが、edge が設置されているとき含まれないケースのときにここにくる
                 return;
             }
+
             var firstHitGameObject = hitinfo.collider.gameObject;
             if (WantToFind(firstHitGameObject))
             {
-                if (FoundObjects.Exists(obj => obj.GetInstanceID() == gameObj.GetInstanceID())) { return; }
+                if (FoundObjects.Exists(obj => obj.GetInstanceID() == firstHitGameObject.GetInstanceID())) { return; }
                 foundCounter++;
                 FoundObjects.Add(firstHitGameObject);
-            }
-            else {
-                var index = FoundObjects.FindIndex(obj => obj.GetInstanceID() == gameObj.GetInstanceID());
-                if (index == -1) { return; }
-                lostCounter++;
-                FoundObjects.RemoveAt(index);
             }
         }
 
@@ -180,13 +176,14 @@ namespace PrototypeSneaking.Domain.Stage
 
         private void Include(GameObject gameObj)
         {
-            if (ObjectsInSight.Exists(obj => obj.GetInstanceID() == gameObj.GetInstanceID())){ return; }
             if (!WantToFind(gameObj)) { return; }
+            if (ObjectsInSight.Exists(obj => obj.GetInstanceID() == gameObj.GetInstanceID())){ return; }
             ObjectsInSight.Add(gameObj);
         }
 
         private void Exclude(GameObject gameObj)
         {
+            if (!WantToFind(gameObj)) { return; }
             var index = ObjectsInSight.FindIndex(obj => obj.GetInstanceID() == gameObj.GetInstanceID());
             if (index == -1) { return; }
             ObjectsInSight.RemoveAt(index);
@@ -200,7 +197,10 @@ namespace PrototypeSneaking.Domain.Stage
 
         private bool WantToFind(GameObject gameObj)
         {
-            return gameObj.layer != 2; // TODO: 一旦常に true
+            // タグも用意しているがあえて継承状況を確認している
+            // タグを使うメリット : GetComponent より高速
+            // 継承を使うメリット : スクリプトを付与することを強制するので設定漏れを回避しやすい
+            return gameObj.GetComponent<Detectable>() != null;
         }
     }
 

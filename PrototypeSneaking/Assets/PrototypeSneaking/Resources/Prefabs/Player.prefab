@@ -79,7 +79,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b3de786931f54769bb142633043efb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sight: {fileID: 0}
   sensor: {fileID: 599148984709054930}
 --- !u!1 &521337157318149062
 GameObject:
