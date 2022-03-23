@@ -102,9 +102,9 @@ namespace PrototypeSneaking.Domain.Stage
             // 何かを見つけてる状態なのに気配はない状態はありえない
             if (IsFound && !FeelSigns)
             {
-                var msg = $"GameObject ({character.Name}) has unexcepted collision. "
+                var msg = $"GameObject ({character.Name}) (id: {character.GetInstanceID()}) has unexcepted collision. "
                         + $"{FoundObjects.Count} gameObjects unexcepted. "
-                        + $"(e.g. {FoundObjects[0].name} is found, but no feel sign)";
+                        + $"(e.g. {FoundObjects[0].name} (id: {FoundObjects[0].GetInstanceID()}) is found, but no feel sign)";
                 throw new SightException(msg);
             }
             if (ObjectsInSight.Count < FoundObjects.Count)
@@ -197,6 +197,9 @@ namespace PrototypeSneaking.Domain.Stage
 
         private bool WantToFind(GameObject gameObj)
         {
+            // 自分自身は検査の対象外
+            // 注意として character.GetInstanceID() != character.GameObject.GetInstanceID()
+            if (gameObj.GetInstanceID() == character.GameObject.GetInstanceID()) { return false; }
             // タグも用意しているがあえて継承状況を確認している
             // タグを使うメリット : GetComponent より高速
             // 継承を使うメリット : スクリプトを付与することを強制するので設定漏れを回避しやすい
