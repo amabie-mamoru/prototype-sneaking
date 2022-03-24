@@ -7,7 +7,7 @@ namespace PrototypeSneaking.Domain.Stage
     public class LinearTrackingHabit : CharacterHabit
     {
         private List<Vector3> accessPoints;
-        private Quaternion originalQuaternion;
+        private Vector3 originalLookAtPosition;
         private Quaternion capturedBeginningSearchedQuaternion;
         private Vector3 capturedBeginningSearchedPosition;
         private Quaternion capturedLastSearchedQuaternion;
@@ -16,7 +16,7 @@ namespace PrototypeSneaking.Domain.Stage
         private ILinearTrackingHabitStateMachine state;
         private GameObject trackingObj;
 
-        private const float ALLOWABLE_ERROR = 0.0001f;
+        private const float ALLOWABLE_ERROR = 0.08f; // NOTE: 現状だと 0.0666... に収束してしまったので少し大きめの値に設定
         [SerializeField] private float rotationSpeed = 2f;
 
         private void Awake()
@@ -40,8 +40,10 @@ namespace PrototypeSneaking.Domain.Stage
 #if UNITY_EDITOR
             state.DebugLog(character.Name); // TODO: Debug
 #endif
+            CheckToAccessPoint();
+            CheckToLoseAttackObj();
             CheckToSearchObj();
-            CheckToTargetPosition();
+            CheckToAttackDistance();
             CheckSight();
         }
 
@@ -52,7 +54,6 @@ namespace PrototypeSneaking.Domain.Stage
         {
             if (!state.IsWondering) { return; }
             // 見失ってたら
-            // if (sight.GetLostCountAndReset() != 0) { LostObject(); }
             if (!sight.IsFound) { return; }
             // 何かを見つけたら
             if (sight.GetFoundCountAndReset() != 0)
@@ -76,47 +77,49 @@ namespace PrototypeSneaking.Domain.Stage
         {
             state.ToTrack();
             agent.SetDestination(foundObj.transform.position);
+            accessPoints.Add(character.transform.position);
             accessPoints.Add(foundObj.transform.position);
-            originalQuaternion = foundObj.transform.rotation;
+            originalLookAtPosition = foundObj.transform.position;
         }
 
         /// <summary>
         /// 何かを見失った時に一度だけ呼ばれる
         /// </summary>
-        private void LostObject()
+        private void CheckToLoseAttackObj()
         {
-            state.JustToLose();
+            if (!state.IsLostAttackObj) { return; }
+            state.ToGoBack();
+            accessPoints.RemoveAt(accessPoints.Count - 1);
+            agent.SetDestination(accessPoints.Last());
+            character.transform.LookAt(accessPoints.Last());
         }
 
         /// <summary>
         /// 目的の場所に到達したかのチェック
         /// </summary>
-        private void CheckToTargetPosition()
+        private void CheckToAttackDistance()
         {
-            if (!(state.IsTracking || state.IsGoingBack)) { return; }
+            if (!state.IsTracking) { return; }
             var isClose = Vector3.Magnitude(character.transform.position - accessPoints.Last()) <= character.RadiusWithMargin;
             if (state.IsTracking)
             {
                 if (isClose) { ReachTargetPosition(); }
             }
-            else if (state.IsGoingBack)
+        }
+
+        private void CheckToAccessPoint()
+        {
+            if (!state.IsGoBack) { return; }
+            Debug.Log(Vector3.Magnitude(character.transform.position - accessPoints.Last()));
+            var isJust = Vector3.Magnitude(character.transform.position - accessPoints.Last()) <= ALLOWABLE_ERROR;
+            if (!isJust) { return; }
+            if (accessPoints.Count == 1)
             {
-                if (isClose)
-                {
-                    if (accessPoints.Count == 1)
-                    {
-                        var isJust = Vector3.Magnitude(character.transform.position - accessPoints.Last()) <= ALLOWABLE_ERROR;
-                        if (isJust) { WentBackToOriginalPosition(); }
-                    }
-                    else
-                    {
-                        WentBackToAccessPoint();
-                    }
-                }
+                WentBackToOriginalPosition();
             }
             else
             {
-                throw new LinearTrackingHabitException("非同期で一つの LinearTrackingHabit を操作している可能性があります");            
+                WentBackToAccessPoint();
             }
         }
 
@@ -148,7 +151,9 @@ namespace PrototypeSneaking.Domain.Stage
 
         private void ReachTargetPosition()
         {
-            accessPoints.Add(character.transform.position);
+            // NOTE: 障害物にぶつからない isClose な場所で Reach だと判断したとき、 agent の Destination とズレるので合わせる
+            agent.SetDestination(character.transform.position);
+
             state.ToReachAttackDistance();
             state.ToSearchAttackObj();
             capturedBeginningSearchedPosition = character.transform.position;
@@ -169,8 +174,8 @@ namespace PrototypeSneaking.Domain.Stage
         {
             accessPoints.RemoveAt(0);
             state.ToWonder();
-            character.transform.rotation = originalQuaternion;
-            originalQuaternion = Quaternion.identity;
+            // originalLookAtPosition はとりあえず初期化しない
+            character.transform.LookAt(originalLookAtPosition);
         }
 
         /// <summary>
@@ -179,6 +184,7 @@ namespace PrototypeSneaking.Domain.Stage
         private void WentBackToAccessPoint()
         {
             accessPoints.RemoveAt(accessPoints.Count - 1);
+            agent.SetDestination(accessPoints.Last());
         }
 
         /// <summary>
@@ -191,6 +197,7 @@ namespace PrototypeSneaking.Domain.Stage
 
         private void DecideAction()
         {
+            GoBack();
             SearchAttackObj();
             Tracking();
             Wondering();
@@ -204,9 +211,6 @@ namespace PrototypeSneaking.Domain.Stage
         private void Tracking()
         {
             if (!state.IsTracking) { return; }
-            if (state.IsJustLost || state.IsGoingBack) { return; }
-            var dir = agent.nextPosition - character.transform.position;
-
             // 記事による回転変更
             // 「【Unity】NavMeshAgentの経路だけを参照して移動処理に利用したお話」
             // 「NavMeshAgentの挙動を手動でアップデートする」
@@ -226,6 +230,17 @@ namespace PrototypeSneaking.Domain.Stage
             }
             // TODO: これが本当に 100% になるかは未確認。ならない場合、無限にここの処理を通る
             character.transform.rotation = Quaternion.Lerp(capturedBeginningSearchedQuaternion, capturedLastSearchedQuaternion, searchingElapsedRatio);
+        }
+
+        private void GoBack()
+        {
+            if (!state.IsGoBack) { return; }
+            // 記事による回転変更
+            // 「【Unity】NavMeshAgentの経路だけを参照して移動処理に利用したお話」
+            // 「NavMeshAgentの挙動を手動でアップデートする」
+
+            // 位置の更新
+            character.transform.position = agent.nextPosition;
         }
 
 #if UNITY_EDITOR

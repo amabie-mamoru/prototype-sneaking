@@ -8,8 +8,7 @@ namespace PrototypeSneaking.Domain.Stage
         bool IsSearchingAttackObj { get; }
         bool IsLostAttackObj { get; }
         bool IsAttacking { get; }
-        bool IsJustLost { get; }
-        bool IsGoingBack { get; }
+        bool IsGoBack { get; }
         void ToDisable();
         void ToWonder();
         void ToTrack();
@@ -17,7 +16,6 @@ namespace PrototypeSneaking.Domain.Stage
         void ToSearchAttackObj();
         void ToLoseAttackObj();
         void ToAttack();
-        void JustToLose();
         void ToGoBack();
 #if UNITY_EDITOR
         // デバッグ用
@@ -37,7 +35,6 @@ namespace PrototypeSneaking.Domain.Stage
             SearchingAttackObj,
             LostAttackObj,
             Attacking,
-            JustLost,
             GoBack
         }
 
@@ -47,8 +44,7 @@ namespace PrototypeSneaking.Domain.Stage
         public bool IsSearchingAttackObj => state == State.SearchingAttackObj;
         public bool IsLostAttackObj => state == State.LostAttackObj;
         public bool IsAttacking => state == State.Attacking;
-        public bool IsJustLost => state == State.JustLost;
-        public bool IsGoingBack => state == State.GoBack;
+        public bool IsGoBack => state == State.GoBack;
 
         public LinearTrackingHabitStateMachine()
         {
@@ -96,15 +92,9 @@ namespace PrototypeSneaking.Domain.Stage
             state = State.Attacking;
         }
 
-        public void JustToLose()
-        {
-            Allow(allowedStates: new State[] { State.Tracking, State.LostAttackObj }, toState: State.JustLost);
-            state = State.JustLost;
-        }
-
         public void ToGoBack()
         {
-            AllowOnly(allowedState: State.JustLost, toState: State.GoBack);
+            AllowOnly(allowedState: State.LostAttackObj, toState: State.GoBack);
             state = State.GoBack;
         }
 
