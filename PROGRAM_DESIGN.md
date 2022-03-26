@@ -49,11 +49,11 @@ interface ICharacterHabit {
 
 Automonus *-- ICharacterHabit
 
-class GoStraightHabit {}
+class ForwardTrackHabit {}
 
 class TrackingHabit {}
 
-ICharacterHabit <|-- GoStraightHabit
+ICharacterHabit <|-- ForwardTrackHabit
 ICharacterHabit <|-- TrackingHabit
 
 @enduml

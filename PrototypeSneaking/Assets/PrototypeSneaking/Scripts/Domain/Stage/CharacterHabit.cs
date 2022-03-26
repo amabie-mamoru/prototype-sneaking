@@ -12,6 +12,7 @@ namespace PrototypeSneaking.Domain.Stage
 
     public class CharacterHabit : MonoBehaviour, ICharacterHabit
     {
+        [SerializeField] protected float attackDistance; 
         protected Automonus character;
         protected NavMeshAgent agent;
         protected Sight sight;

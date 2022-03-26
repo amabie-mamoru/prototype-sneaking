@@ -13,6 +13,7 @@ namespace PrototypeSneaking.Domain.Stage
         /// <summary>
         /// 視界に捉えている物質
         /// </summary>
+        [System.NonSerialized]
         public List<GameObject> FoundObjects;
 
         /// <summary>
@@ -34,6 +35,8 @@ namespace PrototypeSneaking.Domain.Stage
 
         private bool Enabled;
 
+        private Character character;
+
         public Sight()
         {
             ObjectsInSight = new List<GameObject>();
@@ -46,18 +49,11 @@ namespace PrototypeSneaking.Domain.Stage
             this.eyePositions = eyePositions;
         }
 
-        public void ToDisable()
+        public void SetCharacter(Character character)
         {
-            ObjectsInSight = new List<GameObject>();
-            FoundObjects = new List<GameObject>();
-            foundCounter = 0;
-            lostCounter = 0;
-            Enabled = false;
-        }
-
-        public void ToEnable()
-        {
-            Enabled = true;
+            this.character = character;
+            // NOTE: lay を投げた時に自分自身の一部が視線に入ってしまうケースを考慮するために Ignore Raycast にする
+            character.GameObject.layer = 1 << 1;
         }
 
         /// <summary>
@@ -87,11 +83,6 @@ namespace PrototypeSneaking.Domain.Stage
 
 #if UNITY_EDITOR
         // TODO: デバッグ用の例外処理（リリース時には取り除く）
-        Character character;
-        public void SetCharacter(Character character)
-        {
-            this.character = character;
-        }
 
         // ライフサイクル的に Update だと、1フレームに1回以上よばれる（physics cycle may happen more than once per frame）
         // と公式文章にもあるので Trigger が1回よばれる毎に必ず1回は確認する FixedUpdate の段階でチェックする
@@ -101,9 +92,9 @@ namespace PrototypeSneaking.Domain.Stage
             // 何かを見つけてる状態なのに気配はない状態はありえない
             if (IsFound && !FeelSigns)
             {
-                var msg = $"GameObject ({character.Name}) has unexcepted collision. "
+                var msg = $"GameObject ({character.Name}) (id: {character.GetInstanceID()}) has unexcepted collision. "
                         + $"{FoundObjects.Count} gameObjects unexcepted. "
-                        + $"(e.g. {FoundObjects[0].name} is found, but no feel sign)";
+                        + $"(e.g. {FoundObjects[0].name} (id: {FoundObjects[0].GetInstanceID()}) is found, but no feel sign)";
                 throw new SightException(msg);
             }
             if (ObjectsInSight.Count < FoundObjects.Count)
@@ -149,6 +140,7 @@ namespace PrototypeSneaking.Domain.Stage
 
         private void FindOrLoseWithRay(Vector3 eyePosition, Vector3 gameObjTargetPosition, GameObject gameObj)
         {
+
             var direction = Vector3.Normalize(gameObjTargetPosition - eyePosition);
             var maxDistance = Vector3.Magnitude(gameObjTargetPosition - eyePosition) + 1f; // ちょっと長めに設定しておく
             int layerMask = ~(1 << 2);
@@ -157,18 +149,13 @@ namespace PrototypeSneaking.Domain.Stage
                 // 間にオブジェクトの一部自体は入っているが、edge が設置されているとき含まれないケースのときにここにくる
                 return;
             }
+
             var firstHitGameObject = hitinfo.collider.gameObject;
             if (WantToFind(firstHitGameObject))
             {
-                if (FoundObjects.Exists(obj => obj.GetInstanceID() == gameObj.GetInstanceID())) { return; }
+                if (FoundObjects.Exists(obj => obj.GetInstanceID() == firstHitGameObject.GetInstanceID())) { return; }
                 foundCounter++;
                 FoundObjects.Add(firstHitGameObject);
-            }
-            else {
-                var index = FoundObjects.FindIndex(obj => obj.GetInstanceID() == gameObj.GetInstanceID());
-                if (index == -1) { return; }
-                lostCounter++;
-                FoundObjects.RemoveAt(index);
             }
         }
 
@@ -180,13 +167,14 @@ namespace PrototypeSneaking.Domain.Stage
 
         private void Include(GameObject gameObj)
         {
-            if (ObjectsInSight.Exists(obj => obj.GetInstanceID() == gameObj.GetInstanceID())){ return; }
             if (!WantToFind(gameObj)) { return; }
+            if (ObjectsInSight.Exists(obj => obj.GetInstanceID() == gameObj.GetInstanceID())){ return; }
             ObjectsInSight.Add(gameObj);
         }
 
         private void Exclude(GameObject gameObj)
         {
+            if (!WantToFind(gameObj)) { return; }
             var index = ObjectsInSight.FindIndex(obj => obj.GetInstanceID() == gameObj.GetInstanceID());
             if (index == -1) { return; }
             ObjectsInSight.RemoveAt(index);
@@ -200,7 +188,13 @@ namespace PrototypeSneaking.Domain.Stage
 
         private bool WantToFind(GameObject gameObj)
         {
-            return gameObj.layer != 2; // TODO: 一旦常に true
+            // 自分自身は検査の対象外
+            // 注意として character.GetInstanceID() != character.GameObject.GetInstanceID()
+            if (gameObj.GetInstanceID() == character.GameObject.GetInstanceID()) { return false; }
+            // タグも用意しているがあえて継承状況を確認している
+            // タグを使うメリット : GetComponent より高速
+            // 継承を使うメリット : スクリプトを付与することを強制するので設定漏れを回避しやすい
+            return gameObj.GetComponent<Detectable>() != null;
         }
     }
 

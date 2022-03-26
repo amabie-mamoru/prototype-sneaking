@@ -12,10 +12,8 @@ namespace PrototypeSneaking.Domain.Stage
         protected virtual void Awake()
         {
             sight.SetEyes(sensor.Eyes);
-#if UNITY_EDITOR
-            // TODO: デバッグ用の例外処理
             sight.SetCharacter(this);
-#endif
+
             // エディタいじってたら off にすることもあると思うので。
             if (!sight.GameObject.activeSelf)
             {
