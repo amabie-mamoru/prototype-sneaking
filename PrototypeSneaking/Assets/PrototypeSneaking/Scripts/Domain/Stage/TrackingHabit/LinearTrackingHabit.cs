@@ -61,7 +61,7 @@ namespace PrototypeSneaking.Domain.Stage
                 var closest = Mathf.Infinity;
                 GameObject closestObj = new GameObject();
                 sight.FoundObjects.ForEach(obj => {
-                    var distance = Vector3.Magnitude(character.transform.position - sight.FoundObjects[0].transform.position);
+                    var distance = Vector3.Magnitude(character.transform.position - obj.transform.position);
                     if (distance < closest) { closestObj = obj; }
                 });
                 trackingObj = closestObj;
@@ -101,16 +101,12 @@ namespace PrototypeSneaking.Domain.Stage
         {
             if (!state.IsTracking) { return; }
             var isClose = Vector3.Magnitude(character.transform.position - accessPoints.Last()) <= character.RadiusWithMargin;
-            if (state.IsTracking)
-            {
-                if (isClose) { ReachTargetPosition(); }
-            }
+            if (isClose) { ReachTargetPosition(); }
         }
 
         private void CheckToAccessPoint()
         {
             if (!state.IsGoBack) { return; }
-            Debug.Log(Vector3.Magnitude(character.transform.position - accessPoints.Last()));
             var isJust = Vector3.Magnitude(character.transform.position - accessPoints.Last()) <= ALLOWABLE_ERROR;
             if (!isJust) { return; }
             if (accessPoints.Count == 1)
@@ -141,7 +137,7 @@ namespace PrototypeSneaking.Domain.Stage
                 var closest = Mathf.Infinity;
                 GameObject closestObj = new GameObject();
                 sight.FoundObjects.ForEach(obj => {
-                    var distance = Vector3.Magnitude(character.transform.position - sight.FoundObjects[0].transform.position);
+                    var distance = Vector3.Magnitude(character.transform.position - obj.transform.position);
                     if (distance < closest) { closestObj = obj; }
                 });
                 state.ToDisable();
@@ -176,6 +172,7 @@ namespace PrototypeSneaking.Domain.Stage
             state.ToWonder();
             // originalLookAtPosition はとりあえず初期化しない
             character.transform.LookAt(originalLookAtPosition);
+            agent.SetDestination(character.transform.position);
         }
 
         /// <summary>

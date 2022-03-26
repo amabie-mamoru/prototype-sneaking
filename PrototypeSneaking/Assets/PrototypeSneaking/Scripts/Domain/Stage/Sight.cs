@@ -35,6 +35,8 @@ namespace PrototypeSneaking.Domain.Stage
 
         private bool Enabled;
 
+        private Character character;
+
         public Sight()
         {
             ObjectsInSight = new List<GameObject>();
@@ -47,18 +49,11 @@ namespace PrototypeSneaking.Domain.Stage
             this.eyePositions = eyePositions;
         }
 
-        public void ToDisable()
+        public void SetCharacter(Character character)
         {
-            ObjectsInSight = new List<GameObject>();
-            FoundObjects = new List<GameObject>();
-            foundCounter = 0;
-            lostCounter = 0;
-            Enabled = false;
-        }
-
-        public void ToEnable()
-        {
-            Enabled = true;
+            this.character = character;
+            // NOTE: lay を投げた時に自分自身の一部が視線に入ってしまうケースを考慮するために Ignore Raycast にする
+            character.GameObject.layer = 1 << 1;
         }
 
         /// <summary>
@@ -88,11 +83,6 @@ namespace PrototypeSneaking.Domain.Stage
 
 #if UNITY_EDITOR
         // TODO: デバッグ用の例外処理（リリース時には取り除く）
-        Character character;
-        public void SetCharacter(Character character)
-        {
-            this.character = character;
-        }
 
         // ライフサイクル的に Update だと、1フレームに1回以上よばれる（physics cycle may happen more than once per frame）
         // と公式文章にもあるので Trigger が1回よばれる毎に必ず1回は確認する FixedUpdate の段階でチェックする
@@ -150,6 +140,7 @@ namespace PrototypeSneaking.Domain.Stage
 
         private void FindOrLoseWithRay(Vector3 eyePosition, Vector3 gameObjTargetPosition, GameObject gameObj)
         {
+
             var direction = Vector3.Normalize(gameObjTargetPosition - eyePosition);
             var maxDistance = Vector3.Magnitude(gameObjTargetPosition - eyePosition) + 1f; // ちょっと長めに設定しておく
             int layerMask = ~(1 << 2);

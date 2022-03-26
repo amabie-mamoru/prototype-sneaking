@@ -78,7 +78,6 @@ namespace PrototypeSneaking.Domain.Stage
             if (Vector3.Magnitude(character.transform.position - sight.FoundObjects[0].transform.position) <= 2)
             {
                 LoseObject();
-                sight.ToDisable();
             }
         }
 
@@ -88,7 +87,6 @@ namespace PrototypeSneaking.Domain.Stage
             if (Vector3.Magnitude(character.transform.position - agent.destination) <= 0.001f)
             {
                 ReachOrigin();
-                sight.ToEnable();
             }
         }
     }
