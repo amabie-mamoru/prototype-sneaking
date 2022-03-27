@@ -29,11 +29,9 @@ namespace PrototypeSneaking.Domain.Stage
         private uint foundCounter = 0;
         private uint lostCounter = 0;
 
-        private List<Vector3> eyePositions;
-
         public GameObject GameObject => gameObject;
 
-        private bool Enabled;
+        public bool Enabled { get; set; }
 
         private Character character;
 
@@ -42,11 +40,6 @@ namespace PrototypeSneaking.Domain.Stage
             ObjectsInSight = new List<GameObject>();
             FoundObjects = new List<GameObject>();
             Enabled = true;
-        }
-
-        public void SetEyes(List<Vector3> eyePositions)
-        {
-            this.eyePositions = eyePositions;
         }
 
         public void SetCharacter(Character character)
@@ -114,7 +107,7 @@ namespace PrototypeSneaking.Domain.Stage
         {
             if (!Enabled) { return; }
             if (ObjectsInSight.Count == 0) { return; }
-            foreach (var eyePosition in eyePositions)
+            foreach (var eyePosition in character.Eyes)
             {
                 foreach (var gameObj in ObjectsInSight)
                 {

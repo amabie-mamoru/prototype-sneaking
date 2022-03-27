@@ -11,6 +11,7 @@ namespace PrototypeSneaking.Domain.Stage
     public class Character : Detectable, ICharacter
     {
         [SerializeField] protected Sensor sensor;
+        public List<Vector3> Eyes => sensor.Eyes;
         public List<Vector3> Edges => sensor.Edges;
         public string Name => gameObject.name;
         public GameObject GameObject => gameObject;
