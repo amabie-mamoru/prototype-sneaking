@@ -11,7 +11,6 @@ namespace PrototypeSneaking.Domain.Stage
 
         protected virtual void Awake()
         {
-            sight.SetEyes(sensor.Eyes);
             sight.SetCharacter(this);
 
             // エディタいじってたら off にすることもあると思うので。

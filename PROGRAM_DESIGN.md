@@ -49,12 +49,12 @@ interface ICharacterHabit {
 
 Automonus *-- ICharacterHabit
 
-class ForwardTrackHabit {}
+class LinearTrackingHabit
+class WonderHabit
 
-class TrackingHabit {}
-
-ICharacterHabit <|-- ForwardTrackHabit
-ICharacterHabit <|-- TrackingHabit
+ICharacterHabit <|-- LinearTrackingHabit
+ICharacterHabit <|-- WonderHabit
+LinearTrackingHabit *-- WonderHabit
 
 @enduml
 ```

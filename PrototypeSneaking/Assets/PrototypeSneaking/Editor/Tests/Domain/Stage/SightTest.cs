@@ -14,6 +14,8 @@ namespace PrototypeSneaking.Editor.Tests.Domain.Stage
             sight = gameObj.AddComponent<Sight>();
         }
 
+        // TODO: シナリオテストとしてすでに OnTriggerEnter してる場合や途中でいきなりゲームオブジェクトが Create/Destroy されたときなどもテストできるとよりよい
+
         [Test]
         public void Include()
         {
